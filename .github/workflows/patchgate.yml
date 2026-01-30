@@ -1,0 +1,47 @@
+name: PatchGate
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  regression:
+    name: Regression (Frozen v1)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Make scripts executable
+        run: |
+          chmod +x patch_gate.sh
+          chmod +x tests/run.sh
+
+      - name: Run regression corpus
+        run: ./tests/run.sh
+
+  pr_patch_validation:
+    name: Validate PR Patch (PP1)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout base (apply target)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.base.sha }}
+
+      - name: Fetch head commit
+        run: |
+          git fetch --no-tags --depth=1 origin ${{ github.event.pull_request.head.sha }}
+
+      - name: Generate PR diff (no renames)
+        run: |
+          git diff --no-renames ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} > pr.diff
+          test -s pr.diff || (echo "Empty diff (nothing to validate)" >&2; exit 1)
+
+      - name: Validate via PatchGate
+        run: |
+          chmod +x patch_gate.sh
+          ./patch_gate.sh pr.diff
