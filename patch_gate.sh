@@ -67,7 +67,7 @@ awk '
     if (a!=b) { print "mismatch paths in diff header: " a " vs " b; exit 2; }
     if (a ~ /^\// || a ~ /^\.$/ || a ~ /^$/) { print "invalid path: " a; exit 2; }
     if (a ~ /\.\.\// || a ~ /\/\.\./ || a ~ /^\.\./) { print "unsafe path: " a; exit 2; }
-    if (a ~ /\\\\/) { print "backslash path not allowed: " a; exit 2; }
+    if (a ~ /\\/) { print "backslash path not allowed: " a; exit 2; }
     if (a ~ /^\.git\//) { print "touching .git/ is not allowed: " a; exit 2; }
   }
 ' "$TMP_PATCH" || die "path safety check failed"
