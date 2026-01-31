@@ -1,3 +1,6 @@
+concurrency:
+  group: patchgate-${{ github.ref }}
+  cancel-in-progress: true
 name: PatchGate
 
 on:
