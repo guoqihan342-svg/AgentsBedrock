@@ -4,6 +4,7 @@ on:
   pull_request:
   push:
     branches: [ main ]
+  workflow_dispatch:  # ⭐ 新增：启用「Run workflow」按钮（无参数最简方案）
 
 jobs:
   regression:
